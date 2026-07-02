@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { errorHandler } from './middleware/error.middleware.js';
 import authRoutes from './routes/auth.routes.js';
+import resumeRoutes from './routes/resume.routes.js';
 
 const app = express();
 
@@ -12,6 +13,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/resumes', resumeRoutes);
+
+// Expose uploads directory statically if needed
+app.use('/uploads', express.static('uploads'));
 
 // Error Handling Middleware
 app.use(errorHandler);
