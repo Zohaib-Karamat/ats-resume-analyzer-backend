@@ -4,6 +4,7 @@ import { errorHandler } from './middleware/error.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import resumeRoutes from './routes/resume.routes.js';
 import jobDescriptionRoutes from './routes/jobDescription.routes.js';
+import analysisRoutes from './routes/analysis.routes.js';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/job-descriptions', jobDescriptionRoutes);
+app.use('/api/analysis', analysisRoutes);
 
 // Expose uploads directory statically if needed
 app.use('/uploads', express.static('uploads'));
