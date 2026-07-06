@@ -2,7 +2,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import * as authService from "../services/auth.service.js";
-import { registerSchema, loginSchema } from "../validators/auth.validator.js";
+import {
+  registerSchema,
+  loginSchema,
+  changePasswordSchema,
+} from "../validators/auth.validator.js";
 
 export const register = asyncHandler(async (req, res) => {
   // Validate request body
@@ -54,4 +58,23 @@ export const logout = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export const changePassword = asyncHandler(async (req, res) => {
+  // Validate request body
+  const validationResult = changePasswordSchema.safeParse(req.body);
+  if (!validationResult.success) {
+    throw new ApiError(
+      400,
+      "Validation Error",
+      validationResult.error.format(),
+    );
+  }
+
+  const { currentPassword, newPassword } = validationResult.data;
+  await authService.changePassword(req.user._id, currentPassword, newPassword);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
 });

@@ -4,6 +4,7 @@ import {
   login,
   getMe,
   logout,
+  changePassword,
 } from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
@@ -13,5 +14,6 @@ router.post("/register", register);
 router.post("/login", login);
 router.get("/me", verifyJWT, getMe);
 router.post("/logout", verifyJWT, logout);
+router.post("/change-password", verifyJWT, changePassword);
 
 export default router;
