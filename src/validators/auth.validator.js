@@ -27,3 +27,15 @@ export const changePasswordSchema = z
     message: "New password must be different from current password",
     path: ["newPassword"],
   });
+
+export const updateProfileSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, "Name must be at least 2 characters long")
+      .optional(),
+    email: z.string().email("Invalid email address").optional(),
+  })
+  .refine((data) => data.name !== undefined || data.email !== undefined, {
+    message: "At least one field (name or email) must be provided",
+  });

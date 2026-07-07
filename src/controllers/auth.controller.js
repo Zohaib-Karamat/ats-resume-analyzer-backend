@@ -6,6 +6,7 @@ import {
   registerSchema,
   loginSchema,
   changePasswordSchema,
+  updateProfileSchema,
 } from "../validators/auth.validator.js";
 
 export const register = asyncHandler(async (req, res) => {
@@ -77,4 +78,25 @@ export const changePassword = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
+
+export const updateProfile = asyncHandler(async (req, res) => {
+  // Validate request body
+  const validationResult = updateProfileSchema.safeParse(req.body);
+  if (!validationResult.success) {
+    throw new ApiError(
+      400,
+      "Validation Error",
+      validationResult.error.format(),
+    );
+  }
+
+  const updatedUser = await authService.updateProfile(
+    req.user._id,
+    validationResult.data,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "Profile updated successfully"));
 });

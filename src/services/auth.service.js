@@ -52,3 +52,26 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   user.password = newPassword;
   await user.save();
 };
+
+export const updateProfile = async (userId, updateData) => {
+  const { email } = updateData;
+
+  if (email) {
+    const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+    if (existingUser) {
+      throw new ApiError(409, "Email is already in use by another account");
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateData },
+    { new: true, runValidators: true },
+  ).select("-password");
+
+  if (!updatedUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return updatedUser;
+};
