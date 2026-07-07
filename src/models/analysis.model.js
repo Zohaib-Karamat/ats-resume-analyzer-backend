@@ -59,7 +59,7 @@ const analysisSchema = new Schema(
     },
     aiModel: {
       type: String,
-      default: 'gemini-flash-latest',
+      default: 'gemini-3.5-flash',
     },
     rawResponse: {
       type: Schema.Types.Mixed,

@@ -25,7 +25,7 @@ export const runAnalysis = async (userId, resumeId, jobDescriptionId) => {
   const prompt = generateAtsPrompt(resume.extractedText, jobDescription.description);
 
   // Call AI
-  const { parsed, raw } = await callGeminiApi(prompt);
+  const { parsed, raw, model } = await callGeminiApi(prompt);
 
   // Save the result in DB
   const analysisRecord = await Analysis.create({
@@ -41,6 +41,7 @@ export const runAnalysis = async (userId, resumeId, jobDescriptionId) => {
     grammarSuggestions: parsed.grammarSuggestions || [],
     atsSuggestions: parsed.atsSuggestions || [],
     summary: parsed.summary || "",
+    aiModel: model,
     rawResponse: raw
   });
 
