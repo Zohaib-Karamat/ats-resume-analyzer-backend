@@ -5,6 +5,9 @@ import * as authService from "../services/auth.service.js";
 import {
   registerSchema,
   loginSchema,
+  otpSchema,
+  emailSchema,
+  resetPasswordSchema,
   changePasswordSchema,
   updateProfileSchema,
 } from "../validators/auth.validator.js";
@@ -24,7 +27,48 @@ export const register = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, user, "User registered successfully"));
+    .json(
+      new ApiResponse(
+        201,
+        user,
+        "User registered successfully. Please verify your email with the OTP sent to your inbox",
+      ),
+    );
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const validationResult = otpSchema.safeParse(req.body);
+  if (!validationResult.success) {
+    throw new ApiError(
+      400,
+      "Validation Error",
+      validationResult.error.format(),
+    );
+  }
+
+  const { email, otp } = validationResult.data;
+  const user = await authService.verifyEmail(email, otp);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Email verified successfully"));
+});
+
+export const resendVerificationOtp = asyncHandler(async (req, res) => {
+  const validationResult = emailSchema.safeParse(req.body);
+  if (!validationResult.success) {
+    throw new ApiError(
+      400,
+      "Validation Error",
+      validationResult.error.format(),
+    );
+  }
+
+  await authService.resendEmailVerificationOtp(validationResult.data.email);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Verification OTP sent successfully"));
 });
 
 export const login = asyncHandler(async (req, res) => {
@@ -59,6 +103,41 @@ export const logout = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const validationResult = emailSchema.safeParse(req.body);
+  if (!validationResult.success) {
+    throw new ApiError(
+      400,
+      "Validation Error",
+      validationResult.error.format(),
+    );
+  }
+
+  await authService.sendForgotPasswordOtp(validationResult.data.email);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password reset OTP sent successfully"));
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const validationResult = resetPasswordSchema.safeParse(req.body);
+  if (!validationResult.success) {
+    throw new ApiError(
+      400,
+      "Validation Error",
+      validationResult.error.format(),
+    );
+  }
+
+  const { email, otp, newPassword } = validationResult.data;
+  await authService.resetPasswordWithOtp(email, otp, newPassword);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password reset successfully"));
 });
 
 export const changePassword = asyncHandler(async (req, res) => {

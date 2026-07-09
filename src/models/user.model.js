@@ -19,7 +19,27 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: [true, 'Password is required'],
-    }
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationOtp: {
+      type: String,
+      select: false,
+    },
+    emailVerificationOtpExpiresAt: {
+      type: Date,
+      select: false,
+    },
+    passwordResetOtp: {
+      type: String,
+      select: false,
+    },
+    passwordResetOtpExpiresAt: {
+      type: Date,
+      select: false,
+    },
   },
   { timestamps: true }
 );

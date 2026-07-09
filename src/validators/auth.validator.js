@@ -11,6 +11,33 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+export const otpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z
+    .string()
+    .regex(/^\d{6}$/, "OTP must be a 6-digit code"),
+});
+
+export const emailSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    otp: z
+      .string()
+      .regex(/^\d{6}$/, "OTP must be a 6-digit code"),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters long"),
+    confirmNewPassword: z.string().min(1, "Confirm new password is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New password and confirm password do not match",
+    path: ["confirmNewPassword"],
+  });
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
