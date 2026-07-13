@@ -4,10 +4,10 @@ import app from './app.js';
 
 dotenv.config();
 
-const MONGO_URL = process.env.MONGO_URL;
+const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(MONGO_URL)
+mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('DB connected successfully');
     app.listen(PORT, () => {
