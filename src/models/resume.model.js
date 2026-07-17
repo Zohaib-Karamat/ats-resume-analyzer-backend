@@ -11,10 +11,6 @@ const resumeSchema = new Schema(
       type: String,
       required: true,
     },
-    storedFileName: {
-      type: String,
-      required: true,
-    },
     mimeType: {
       type: String,
       required: true,
@@ -23,10 +19,16 @@ const resumeSchema = new Schema(
       type: Number,
       required: true,
     },
-    filePath: {
+    // ─── Cloudinary Fields ───────────────────────────────────────────────────
+    cloudinaryUrl: {
       type: String,
-      required: true,
+      required: true, // Public HTTPS URL returned by Cloudinary
     },
+    cloudinaryPublicId: {
+      type: String,
+      required: true, // Used to delete the asset from Cloudinary later
+    },
+    // ────────────────────────────────────────────────────────────────────────
     extractedText: {
       type: String,
       default: '',
