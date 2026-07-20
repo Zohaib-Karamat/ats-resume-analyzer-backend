@@ -1,47 +1,22 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { ApiError } from "../utils/ApiError.js";
 
-const getTransporter = () => {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE } =
-    process.env;
-
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: SMTP_SECURE === "true",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
-    },
-    connectionTimeout: 10000, // 10 seconds to connect
-    greetingTimeout: 10000, // 10 seconds for SMTP greeting
-    socketTimeout: 10000, // 10 seconds for general socket inactivity
-  });
-};
+// Initialize Resend with the API key from environment variables
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendOtpEmail = async ({ to, subject, otp, purpose }) => {
-  const transporter = getTransporter();
-  const from = process.env.MAIL_FROM || process.env.SMTP_USER;
-
-  const text = `Your ${purpose} OTP is ${otp}. It will expire in ${
-    process.env.OTP_EXPIRE_MINUTES || 10
-  } minutes.`;
-
-  if (!transporter) {
-    console.log(`[mail:dev] ${subject} for ${to}: ${otp}`);
-    return;
-  }
+  // If you don't have a verified domain yet, Resend forces you to use onboarding@resend.dev
+  // If you do have a verified domain, set it in your Railway variables as MAIL_FROM
+  const from = process.env.MAIL_FROM || "onboarding@resend.dev";
 
   try {
-    await transporter.sendMail({
+    const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
-      text,
+      text: `Your ${purpose} OTP is ${otp}. It will expire in ${
+        process.env.OTP_EXPIRE_MINUTES || 10
+      } minutes.`,
       html: `
         <p>Your ${purpose} OTP is:</p>
         <h2>${otp}</h2>
@@ -50,11 +25,20 @@ export const sendOtpEmail = async ({ to, subject, otp, purpose }) => {
         } minutes.</p>
       `,
     });
+
+    if (error) {
+      console.error("Resend API failed:", error);
+      throw new Error(error.message);
+    }
+
+    console.log(
+      `[mail:success] Email sent to ${to} via Resend. ID: ${data?.id}`,
+    );
   } catch (error) {
-    console.error("Nodemailer failed to send email:", error.message);
+    console.error("Failed to send email via Resend:", error.message);
     throw new ApiError(
       500,
-      "Failed to send email. The mail server took too long to respond or rejected the credentials.",
+      "Failed to send email. Ensure your Resend API key and domain configuration are correct.",
     );
   }
 };
