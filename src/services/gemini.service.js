@@ -2,10 +2,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ApiError } from '../utils/ApiError.js';
 
 const DEFAULT_MODEL_CANDIDATES = [
+  'gemini-3.6-flash',
   'gemini-3.5-flash',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-pro'
+  'gemini-flash-latest'
 ];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,7 +29,7 @@ const isTransientGeminiError = (error) => {
     status === 502 ||
     status === 503 ||
     status === 504 ||
-    /high demand|overload|temporarily unavailable|service unavailable|rate limit/i.test(message)
+    /high demand|overload|temporarily unavailable|service unavailable|rate limit|fetch failed|network error/i.test(message)
   );
 };
 
@@ -101,7 +100,7 @@ export const callGeminiApi = async (promptText) => {
     if (isTransientGeminiError(error)) {
       throw new ApiError(503, "Gemini is temporarily overloaded. Retried with fallback models, but the provider is still unavailable. Please try again in a few minutes.");
     }
-    
+
     if (error instanceof SyntaxError) {
       throw new ApiError(502, "AI returned malformed JSON that could not be parsed.");
     }
